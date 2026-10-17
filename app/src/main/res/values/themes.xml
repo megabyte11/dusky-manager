@@ -1,0 +1,6 @@
+<resources>
+    <!-- Tema base de la ventana. Los colores reales de la interfaz están en ui/theme/Tema.kt -->
+    <style name="Theme.Dusky" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/fondo</item>
+    </style>
+</resources>

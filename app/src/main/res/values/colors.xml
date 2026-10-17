@@ -1,0 +1,5 @@
+<resources>
+    <!-- Color de fondo de la ventana mientras carga (evita un destello blanco). -->
+    <color name="fondo">#FF0D1016</color>
+    <color name="ic_launcher_background">#FF0D1016</color>
+</resources>
