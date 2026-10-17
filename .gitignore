@@ -1,0 +1,18 @@
+# Compilación y archivos de IDE
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.cxx/
+
+# APK/AAB y llaves (la llave de pruebas del proyecto sí se sube)
+*.apk
+*.aab
+*.jks
+*.keystore
+!app/debug.keystore
+
+# NUNCA subir datos reales de clientes
+respaldo*.json
