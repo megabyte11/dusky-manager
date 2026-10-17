@@ -1,0 +1,48 @@
+# Compila el APK en la nube cada vez que subes cambios a la rama "main".
+# Resultado: un APK listo para instalar en Releases -> "Última compilación".
+name: Compilar APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # también permite ejecutarlo a mano desde la pestaña Actions
+
+permissions:
+  contents: write           # necesario para publicar el APK en Releases
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.10.2
+
+      - name: Compilar APK (debug)
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Guardar APK como archivo de la ejecución (respaldo)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dusky-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
+
+      - name: Publicar APK en Releases (siempre en la etiqueta "latest")
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Última compilación
+          prerelease: true
+          body: APK de pruebas generado automáticamente. Descarga app-debug.apk e instálalo en tu celular.
+          files: app/build/outputs/apk/debug/app-debug.apk
