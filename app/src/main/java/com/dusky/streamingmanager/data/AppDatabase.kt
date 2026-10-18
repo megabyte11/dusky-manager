@@ -8,9 +8,16 @@ import androidx.room.RoomDatabase
 /**
  * La base de datos de la app (un archivo SQLite privado: ninguna otra app puede leerlo).
  *
- * IMPORTANTE: si cambias una entidad (agregar o quitar columnas), sube [version].
- * Mientras desarrollamos, al subir la versión se borra todo y se crea de nuevo
- * (fallbackToDestructiveMigration). Antes de usar la app "en serio" hay que quitar esa línea.
+ * IMPORTANTE: si cambias una entidad (agregar o quitar columnas) hay que:
+ *   1) subir [version],
+ *   2) escribir una Migration que conserve los datos y agregarla con .addMigrations(...).
+ * Sin migración la app se cierra al abrir (a propósito: nunca borra los datos de tus clientes).
+ * Ejemplo para agregar una columna en la versión 2:
+ *   val MIGRACION_1_2 = object : Migration(1, 2) {
+ *       override fun migrate(db: SupportSQLiteDatabase) {
+ *           db.execSQL("ALTER TABLE suscripciones ADD COLUMN etiqueta TEXT")
+ *       }
+ *   }
  */
 @Database(
     entities = [Proveedor::class, Servicio::class, Suscripcion::class, Movimiento::class],
@@ -36,7 +43,6 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "dusky.db",
                 )
-                    .fallbackToDestructiveMigration() // TODO: quitar antes de uso real
                     .build()
                     .also { instancia = it }
             }

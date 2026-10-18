@@ -39,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dusky.streamingmanager.BuildConfig
 import com.dusky.streamingmanager.R
 import com.dusky.streamingmanager.ui.MainViewModel
 import com.dusky.streamingmanager.ui.Pantalla
@@ -122,7 +123,7 @@ fun AjustesScreen(vm: MainViewModel, irA: (Pantalla) -> Unit) {
                     color = Paleta.Texto,
                 )
                 Text("Gestor de suscripciones de streaming", color = Paleta.TextoSecundario)
-                Text("Versión 0.2.0 · código abierto, hecho con ayuda de IA (Claude)", color = Paleta.TextoSecundario)
+                Text("Versión ${BuildConfig.VERSION_NAME} · código abierto, hecho con ayuda de IA (Claude)", color = Paleta.TextoSecundario)
             }
         }
 

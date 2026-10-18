@@ -6,6 +6,11 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+// Llave de firma PROPIA: la entrega GitHub Actions con los secretos del repositorio
+// (ver .github/workflows/build-apk.yml). Si no existe (por ejemplo, al compilar un fork),
+// se firma con la llave de pruebas del proyecto y la app igual se compila.
+val rutaLlave: String? = System.getenv("KEYSTORE_FILE")
+
 android {
     namespace = "com.dusky.streamingmanager"
     compileSdk = 35
@@ -14,14 +19,12 @@ android {
         applicationId = "com.dusky.streamingmanager"
         minSdk = 26          // Android 8.0 en adelante
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3      // sube 1 con cada versión nueva
+        versionName = "1.0.0"
     }
 
-    // Llave de firma FIJA (app/debug.keystore). Sin esto, cada compilación en GitHub
-    // saldría con una firma distinta y Android no dejaría actualizar encima de la anterior.
-    // Es una llave de pruebas pública: NO sirve para publicar en Play Store.
     signingConfigs {
+        // Llave de pruebas pública (app/debug.keystore). NO sirve para publicar de verdad.
         getByName("debug") {
             storeFile = file("debug.keystore")
             storeType = "pkcs12"
@@ -29,15 +32,29 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        // Tu llave privada (solo existe cuando compila GitHub con los secretos cargados)
+        if (rutaLlave != null) {
+            create("release") {
+                storeFile = file(rutaLlave)
+                storeType = "pkcs12"
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
-            // Versión final: código recortado y más liviano.
+            // Versión final: código recortado y más liviana.
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (rutaLlave != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 
@@ -50,6 +67,18 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true   // permite leer la versión desde el código (BuildConfig.VERSION_NAME)
+    }
+
+    // No frenar la compilación release por avisos del analizador (lint).
+    lint {
+        checkReleaseBuilds = false
+    }
+
+    // No incluir en el APK el bloque cifrado de "información de dependencias" de Google.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 }
 
