@@ -1,11 +1,14 @@
-# Compila el APK en la nube cada vez que subes cambios a la rama "main".
-# Resultado: un APK listo para instalar en Releases -> "Última compilación".
+# Compila la app, la firma con TU llave (guardada en los Secrets del repositorio) y publica el APK.
+#  - Cada vez que subes cambios a "main": actualiza el APK en Releases -> "Última compilación".
+#  - Cuando publicas un Release con etiqueta (ej: v1.0.0): adjunta el APK a ese Release.
 name: Compilar APK
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:        # también permite ejecutarlo a mano desde la pestaña Actions
+  release:
+    types: [published]
+  workflow_dispatch:        # también se puede ejecutar a mano desde la pestaña Actions
 
 permissions:
   contents: write           # necesario para publicar el APK en Releases
@@ -28,21 +31,64 @@ jobs:
         with:
           gradle-version: 8.10.2
 
-      - name: Compilar APK (debug)
-        run: gradle assembleDebug --no-daemon --stacktrace
+      - name: Preparar la llave de firma
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 -d > "$RUNNER_TEMP/dusky-release.jks"
+            echo "KEYSTORE_FILE=$RUNNER_TEMP/dusky-release.jks" >> "$GITHUB_ENV"
+            echo "Llave de firma lista."
+          else
+            echo "No hay llave en los secretos: se firmará con la llave de pruebas."
+          fi
 
-      - name: Guardar APK como archivo de la ejecución (respaldo)
+      - name: Compilar APK (release)
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Nombrar el APK
+        run: |
+          mkdir -p salida
+          cp app/build/outputs/apk/release/app-release.apk salida/Dusky.apk
+          ls -la salida
+
+      - name: Mostrar con qué llave quedó firmado
+        continue-on-error: true
+        run: |
+          APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$APKSIGNER" verify --print-certs salida/Dusky.apk
+
+      - name: Guardar el mapa de código (sirve para leer errores)
         uses: actions/upload-artifact@v4
         with:
-          name: dusky-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 14
+          name: mapping
+          path: app/build/outputs/mapping/release/mapping.txt
+          retention-days: 30
 
-      - name: Publicar APK en Releases (siempre en la etiqueta "latest")
+      - name: Borrar el APK de pruebas viejo de "Última compilación"
+        if: github.event_name != 'release'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete-asset latest app-debug.apk --yes
+
+      - name: Publicar en "Última compilación"
+        if: github.event_name != 'release'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Última compilación
           prerelease: true
-          body: APK de pruebas generado automáticamente. Descarga app-debug.apk e instálalo en tu celular.
-          files: app/build/outputs/apk/debug/app-debug.apk
+          body: Compilación automática más reciente, firmada con la llave del proyecto. Descarga Dusky.apk e instálalo en tu celular.
+          files: salida/Dusky.apk
+
+      - name: Adjuntar el APK al Release publicado
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: salida/Dusky.apk
