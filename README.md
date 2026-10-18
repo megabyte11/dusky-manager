@@ -4,7 +4,7 @@ App de Android, liviana y de código abierto, para gestionar clientes con mensua
 vencimientos, ganancias, recordatorios por WhatsApp y notificaciones. Tema oscuro, sin internet, sin cuentas:
 todos los datos se guardan solo en tu celular.
 
-> **Estado:** en desarrollo (v0.1.0 — Fase 1: base del proyecto).
+> **Estado:** v0.2.0 — app completa en pruebas.
 
 ## Hecho con ayuda de IA
 
@@ -41,18 +41,25 @@ app/src/main/java/com/dusky/streamingmanager/
 └── util/            Fechas, formato de dinero, cálculo del resumen
 ```
 
-## Hoja de ruta
+## Funciones
 
-1. Base del proyecto, tema oscuro, base de datos, 3 pestañas
-2. Clientes: tarjeta expandible, agregar / editar / renovar / eliminar
-3. Ajustes: proveedores, servicios y actualización de costos
-4. Mensajes de WhatsApp y notificaciones de vencimiento
-5. Historial completo, resumen y respaldo (exportar / importar)
-6. Versión final liviana (release)
+- Lista de suscripciones ordenada por vencimiento, con barra de color por servicio (izquierda) y por días restantes (derecha: 0–5 rojo, 6–10 amarillo, 11+ verde).
+- Tarjeta expandible con teléfono, costo, venta, ganancia, fechas, correo, contraseña, perfil, PIN y nota.
+- Agregar, editar, renovar (queda en el historial), cancelar y eliminar (mantener pulsado, con "Deshacer").
+- Proveedores (icono, color, WhatsApp de ventas y soporte) y servicios con costo y precio; al cambiar precios pregunta si actualiza los clientes actuales.
+- Mensajes de WhatsApp listos para enviar: recordatorio (uno solo si hay varias suscripciones con la misma fecha) y datos de la cuenta. Las plantillas se editan.
+- Aviso diario de vencimientos sin servicios permanentes (WorkManager).
+- Historial de renovaciones y cancelaciones, y resumen de ventas, costos y ganancia.
+- Respaldo: exportar e importar todos los datos en un archivo.
+
+## Pendiente antes de uso real
+
+- Quitar `fallbackToDestructiveMigration()` en `data/AppDatabase.kt` (hoy, si cambia el esquema de la base de datos, se borran los datos).
+- Compilar la versión `release` (más liviana) y revisar el consumo de batería.
 
 ## Privacidad
 
-Los datos de clientes (incluidas contraseñas) nunca salen del celular. **No subas respaldos ni capturas con datos reales a GitHub.**
+Los datos de clientes (incluidas contraseñas) nunca salen del celular. **No subas respaldos ni capturas con datos reales a GitHub** (el archivo de respaldo incluye contraseñas en texto plano).
 
 ## Licencia
 

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Permiso para mostrar los avisos de vencimiento (Android 13 en adelante lo pide al usuario). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- allowBackup=false: evita que las contraseñas de tus clientes se suban a copias de seguridad de Google.
          Para respaldar usaremos la función "Exportar respaldo" de la app. -->
     <application
@@ -13,6 +16,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Dusky">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

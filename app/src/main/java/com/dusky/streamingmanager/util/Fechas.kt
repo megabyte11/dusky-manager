@@ -1,6 +1,7 @@
 package com.dusky.streamingmanager.util
 
 import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 /*
  * Utilidades de fechas. Una fecha se guarda como "día del calendario" (epochDay):
@@ -15,6 +16,14 @@ fun diasRestantes(fechaVencimiento: Long): Long = fechaVencimiento - hoy()
 
 /** Fecha legible: 2026-11-16 */
 fun formatearFecha(dia: Long): String = LocalDate.ofEpochDay(dia).toString()
+
+/** Convierte "2026-11-16" en número de día. Devuelve null si el texto no es una fecha válida. */
+fun parsearFecha(texto: String): Long? =
+    try {
+        LocalDate.parse(texto.trim()).toEpochDay()
+    } catch (e: DateTimeParseException) {
+        null
+    }
 
 /** Qué tan urgente es un vencimiento. Define el color de la barra derecha. */
 enum class NivelUrgencia { VENCIDO, ROJO, AMARILLO, VERDE }

@@ -76,7 +76,7 @@ data class Suscripcion(
     val activa: Boolean = true,      // false = cancelada
 )
 
-/** Una línea del Historial: una renovación, un vencimiento o una cancelación. */
+/** Una línea del Historial: una renovación o una cancelación. */
 @Entity(tableName = "movimientos")
 data class Movimiento(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -93,6 +93,5 @@ data class Movimiento(
 /** Valores posibles de [Movimiento.tipo]. */
 object TipoMovimiento {
     const val RENOVACION = "RENOVACION"
-    const val VENCIMIENTO = "VENCIMIENTO"
     const val CANCELACION = "CANCELACION"
 }

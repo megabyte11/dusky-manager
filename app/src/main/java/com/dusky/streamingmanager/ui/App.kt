@@ -1,83 +1,77 @@
 package com.dusky.streamingmanager.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dusky.streamingmanager.ui.ajustes.AjustesScreen
-import com.dusky.streamingmanager.ui.clientes.ClientesScreen
-import com.dusky.streamingmanager.ui.historial.HistorialScreen
-import com.dusky.streamingmanager.ui.theme.Paleta
+import com.dusky.streamingmanager.ui.ajustes.EditorProveedorScreen
+import com.dusky.streamingmanager.ui.ajustes.EditorServicioScreen
+import com.dusky.streamingmanager.ui.ajustes.MensajesScreen
+import com.dusky.streamingmanager.ui.ajustes.NotificacionesScreen
+import com.dusky.streamingmanager.ui.clientes.FormularioScreen
 
 /**
- * Estructura general: pantalla actual + barra de 3 pestañas abajo + botón redondo (+).
- * Pestañas: 0 = Clientes, 1 = Historial, 2 = Ajustes.
+ * Raíz de la app: decide qué pantalla se ve y maneja el botón "atrás".
+ * Pestañas de la pantalla principal: 0 = Clientes, 1 = Historial, 2 = Ajustes.
  */
 @Composable
 fun App() {
-    var pestana by rememberSaveable { mutableIntStateOf(0) }
     val vm: MainViewModel = viewModel()
+    var pantalla by remember { mutableStateOf<Pantalla>(Pantalla.Principal) }
+    var pestana by rememberSaveable { mutableIntStateOf(0) }
 
-    Scaffold(
-        containerColor = Paleta.Fondo,
-        bottomBar = { BarraPestanas(seleccionada = pestana, alCambiar = { pestana = it }) },
-        floatingActionButton = {
-            if (pestana == 0) {
-                FloatingActionButton(
-                    onClick = vm::agregarPruebas,   // Fase 2: abrirá el formulario de nuevo cliente
-                    shape = CircleShape,
-                    containerColor = Paleta.Verde,
-                    contentColor = Color.Black,
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Agregar cliente")
-                }
-            }
-        },
-    ) { margenes ->
-        Box(Modifier.padding(margenes).fillMaxSize()) {
-            when (pestana) {
-                0 -> ClientesScreen(vm)
-                1 -> HistorialScreen(vm)
-                else -> AjustesScreen()
-            }
+    // "Atrás": desde un editor de servicio se vuelve al proveedor; desde lo demás, a la principal.
+    fun volver() {
+        val actual = pantalla
+        pantalla = if (actual is Pantalla.EditorServicio) {
+            Pantalla.EditorProveedor(actual.proveedorId)
+        } else {
+            Pantalla.Principal
         }
     }
-}
+    BackHandler(enabled = pantalla != Pantalla.Principal) { volver() }
 
-@Composable
-private fun BarraPestanas(seleccionada: Int, alCambiar: (Int) -> Unit) {
-    val pestanas = listOf(
-        "Clientes" to Icons.Filled.Person,
-        "Historial" to Icons.Filled.DateRange,
-        "Ajustes" to Icons.Filled.Settings,
-    )
-    NavigationBar(containerColor = Paleta.Superficie) {
-        pestanas.forEachIndexed { indice, (nombre, icono) ->
-            NavigationBarItem(
-                selected = seleccionada == indice,
-                onClick = { alCambiar(indice) },
-                icon = { Icon(icono, contentDescription = nombre) },
-                label = { Text(nombre) },
+    // Pide permiso para notificaciones (Android 13+) una sola vez, al abrir la app por primera vez.
+    val config by vm.config.collectAsStateWithLifecycle()
+    val pedirPermiso = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= 33 && !config.permisoPreguntado) {
+            vm.marcarPermisoPreguntado()
+            pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    // key(pantalla): cada pantalla empieza con su estado limpio.
+    key(pantalla) {
+        when (val p = pantalla) {
+            Pantalla.Principal -> PantallaPrincipal(
+                vm = vm,
+                pestana = pestana,
+                alCambiarPestana = { pestana = it },
+                irA = { pantalla = it },
             )
+            is Pantalla.Formulario -> FormularioScreen(vm, p.suscripcionId) { volver() }
+            is Pantalla.EditorProveedor -> EditorProveedorScreen(
+                vm = vm,
+                proveedorId = p.proveedorId,
+                irA = { pantalla = it },
+                alVolver = { volver() },
+            )
+            is Pantalla.EditorServicio -> EditorServicioScreen(vm, p.proveedorId, p.servicioId) { volver() }
+            Pantalla.Mensajes -> MensajesScreen(vm) { volver() }
+            Pantalla.Notificaciones -> NotificacionesScreen(vm) { volver() }
         }
     }
 }

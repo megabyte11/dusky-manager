@@ -10,6 +10,7 @@ object Paleta {
     val Fondo = Color(0xFF0D1016)
     val Superficie = Color(0xFF161B22)
     val SuperficieAlta = Color(0xFF1E252E)
+    val Borde = Color(0xFF30363D)
     val Texto = Color(0xFFE6EDF3)
     val TextoSecundario = Color(0xFF8B949E)
 
@@ -19,6 +20,7 @@ object Paleta {
     val Azul = Color(0xFF58A6FF)
     val Morado = Color(0xFFBC8CFF)
     val Gris = Color(0xFF6B7280)
+    val WhatsApp = Color(0xFF25D366)
 }
 
 private val EsquemaOscuro = darkColorScheme(
@@ -29,8 +31,12 @@ private val EsquemaOscuro = darkColorScheme(
     surface = Paleta.Superficie,
     onSurface = Paleta.Texto,
     onSurfaceVariant = Paleta.TextoSecundario,
+    surfaceContainer = Paleta.Superficie,
+    surfaceContainerHigh = Paleta.SuperficieAlta,
     secondaryContainer = Paleta.SuperficieAlta,
     onSecondaryContainer = Paleta.Texto,
+    outline = Paleta.Borde,
+    outlineVariant = Paleta.Borde,
 )
 
 /** Envuelve toda la app con el tema oscuro (no hay tema claro a propósito). */
