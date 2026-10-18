@@ -1,18 +1,18 @@
-# Dusky Streaming Manager
+# Dusky Streaming Manager🍤
 
 App de Android, liviana y de código abierto, para gestionar clientes con mensualidades de servicios de streaming:
 vencimientos, ganancias, recordatorios por WhatsApp y notificaciones. Tema oscuro, sin internet, sin cuentas:
 todos los datos se guardan solo en tu celular.
 
-> **Estado:** v0.2.0 — app completa en pruebas.
+> **Estado:** v0.2.0 — app completa en pruebas.🐟
 
-## Hecho con ayuda de IA
+## Hecho con ayuda de IA🥀
 
 El código de este proyecto fue escrito con ayuda de **Claude** (IA de Anthropic).
 El diseño, las ideas y la dirección del proyecto son de **dusky_os**. Se comparte con licencia MIT para que
 cualquiera pueda usarlo, estudiarlo y mejorarlo.
 
-## Descargar e instalar
+## Descargar e instalar👀
 
 1. Entra a la pestaña **Releases** de este repositorio y abre **Última compilación**.
 2. Descarga `app-debug.apk` desde tu celular.
@@ -24,7 +24,7 @@ Cada vez que se suben cambios a la rama `main`, GitHub compila un APK nuevo auto
 > El APK está firmado con una llave de pruebas pública (`app/debug.keystore`).
 > Sirve para instalar y probar, **no** para publicar en Google Play.
 
-## Tecnología
+## Tecnología🦝
 
 - Kotlin + Jetpack Compose (interfaz) + Room (base de datos local)
 - Un solo módulo, organizado por carpetas, con comentarios en español en cada archivo
@@ -41,7 +41,7 @@ app/src/main/java/com/dusky/streamingmanager/
 └── util/            Fechas, formato de dinero, cálculo del resumen
 ```
 
-## Funciones
+## Funciones🔥
 
 - Lista de suscripciones ordenada por vencimiento, con barra de color por servicio (izquierda) y por días restantes (derecha: 0–5 rojo, 6–10 amarillo, 11+ verde).
 - Tarjeta expandible con teléfono, costo, venta, ganancia, fechas, correo, contraseña, perfil, PIN y nota.
@@ -52,7 +52,7 @@ app/src/main/java/com/dusky/streamingmanager/
 - Historial de renovaciones y cancelaciones, y resumen de ventas, costos y ganancia.
 - Respaldo: exportar e importar todos los datos en un archivo.
 
-## Pendiente antes de uso real
+## Pendiente antes de uso real.🐟
 
 - Quitar `fallbackToDestructiveMigration()` en `data/AppDatabase.kt` (hoy, si cambia el esquema de la base de datos, se borran los datos).
 - Compilar la versión `release` (más liviana) y revisar el consumo de batería.
