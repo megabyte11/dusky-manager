@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Ícono adaptativo: fondo de color + dibujo de Dusky (+ versión de un solo color para los íconos temáticos de Android 13+) -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <foreground android:drawable="@drawable/ic_icono_fg" />
+    <monochrome android:drawable="@drawable/ic_icono_mono" />
 </adaptive-icon>

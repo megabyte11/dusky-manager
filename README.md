@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/icono.png" width="120" alt="Dusky"></p>
+
 # Dusky Streaming Manager
 
 App de Android, liviana y de código abierto, para gestionar clientes con mensualidades de servicios de streaming:

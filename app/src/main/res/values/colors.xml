@@ -1,5 +1,6 @@
 <resources>
     <!-- Color de fondo de la ventana mientras carga (evita un destello blanco). -->
     <color name="fondo">#FF0D1016</color>
-    <color name="ic_launcher_background">#FF0D1016</color>
+    <!-- Fondo del ícono de la app: el mismo azul grisáceo del dibujo de Dusky. -->
+    <color name="ic_launcher_background">#FF28313E</color>
 </resources>
