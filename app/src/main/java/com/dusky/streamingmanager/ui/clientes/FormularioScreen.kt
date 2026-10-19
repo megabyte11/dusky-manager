@@ -1,6 +1,15 @@
 package com.dusky.streamingmanager.ui.clientes
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -8,8 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dusky.streamingmanager.data.ClienteConocido
 import com.dusky.streamingmanager.data.Suscripcion
 import com.dusky.streamingmanager.ui.MainViewModel
 import com.dusky.streamingmanager.ui.components.BotonPeligro
@@ -23,9 +38,11 @@ import com.dusky.streamingmanager.ui.theme.Paleta
 import com.dusky.streamingmanager.util.colorSugerido
 import com.dusky.streamingmanager.util.formatearFecha
 import com.dusky.streamingmanager.util.hoy
+import com.dusky.streamingmanager.util.limpiarTelefono
 import com.dusky.streamingmanager.util.numeroATexto
 import com.dusky.streamingmanager.util.parsearFecha
 import com.dusky.streamingmanager.util.soloDigitos
+import com.dusky.streamingmanager.util.sugerirClientes
 import com.dusky.streamingmanager.util.textoANumero
 
 private const val OPCION_OTRO = "Otro (escribir)"
@@ -40,6 +57,7 @@ fun FormularioScreen(vm: MainViewModel, suscripcionId: Long?, alVolver: () -> Un
     val proveedores by vm.proveedores.collectAsStateWithLifecycle()
     val servicios by vm.servicios.collectAsStateWithLifecycle()
     val conocidos by vm.clientesConocidos.collectAsStateWithLifecycle()
+    val config by vm.config.collectAsStateWithLifecycle()
 
     val existente = suscripcionId?.let { id -> suscripciones.find { it.id == id } }
 
@@ -68,6 +86,9 @@ fun FormularioScreen(vm: MainViewModel, suscripcionId: Long?, alVolver: () -> Un
 
     val serviciosDelProveedor = servicios.filter { it.proveedorId == proveedor?.id }
 
+    // Clientes ya registrados que coinciden con lo escrito (solo al agregar uno nuevo)
+    val sugerencias = if (existente == null) sugerirClientes(conocidos, nombre, telefono) else emptyList()
+
     PantallaConTitulo(
         titulo = if (existente == null) "Nuevo cliente" else "Editar cliente",
         alVolver = alVolver,
@@ -78,16 +99,33 @@ fun FormularioScreen(vm: MainViewModel, suscripcionId: Long?, alVolver: () -> Un
             CampoTexto(
                 valor = telefono,
                 alCambiar = { nuevo ->
-                    telefono = nuevo
+                    // Al pegar "+57 300 123 4567" queda "3001234567"
+                    val limpio = limpiarTelefono(nuevo, config.codigoPais)
+                    telefono = limpio
                     // Si ya conocemos ese teléfono, se rellena el nombre
-                    if (nombre.isBlank() && soloDigitos(nuevo).length >= 7) {
-                        conocidos.find { soloDigitos(it.telefono) == soloDigitos(nuevo) }
+                    if (nombre.isBlank() && limpio.length >= 7) {
+                        conocidos.find { limpiarTelefono(it.telefono, config.codigoPais) == limpio }
                             ?.let { nombre = it.nombreCliente }
                     }
                 },
                 etiqueta = "Teléfono *",
                 teclado = KeyboardType.Phone,
             )
+            if (sugerencias.isNotEmpty()) {
+                Text(
+                    text = "Ya registrados · toca para usar",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Paleta.TextoSecundario,
+                )
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(sugerencias, key = { soloDigitos(it.telefono) }) { cliente ->
+                        ChipCliente(cliente) {
+                            nombre = cliente.nombreCliente
+                            telefono = limpiarTelefono(cliente.telefono, config.codigoPais)
+                        }
+                    }
+                }
+            }
         }
 
         Tarjeta {
@@ -182,7 +220,7 @@ fun FormularioScreen(vm: MainViewModel, suscripcionId: Long?, alVolver: () -> Un
                 vm.guardarSuscripcion(
                     base.copy(
                         nombreCliente = nombre.trim(),
-                        telefono = telefono.trim(),
+                        telefono = limpiarTelefono(telefono, config.codigoPais),
                         servicioId = servicio?.id,
                         proveedorId = proveedor?.id,
                         servicioNombre = nombreServicio,
@@ -223,6 +261,30 @@ fun FormularioScreen(vm: MainViewModel, suscripcionId: Long?, alVolver: () -> Un
                 }) { Text("Sí, cancelar") }
             },
             dismissButton = { TextButton(onClick = { confirmarCancelar = false }) { Text("No") } },
+        )
+    }
+}
+
+/** Cápsula con el nombre del cliente y los últimos 4 dígitos de su teléfono. */
+@Composable
+private fun ChipCliente(cliente: ClienteConocido, alTocar: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(Paleta.SuperficieAlta)
+            .clickable(onClick = alTocar)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = cliente.nombreCliente,
+            color = Paleta.Texto,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = " · " + soloDigitos(cliente.telefono).takeLast(4),
+            color = Paleta.TextoSecundario,
         )
     }
 }

@@ -83,6 +83,7 @@ fun ClientesScreen(
                 TarjetaSuscripcion(
                     s = s,
                     icono = servicio?.icono,
+                    proveedor = proveedor,
                     seleccionada = s.id in seleccion,
                     alTocar = {
                         if (enSeleccion) {

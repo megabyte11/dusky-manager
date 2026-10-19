@@ -12,9 +12,6 @@ import kotlinx.coroutines.flow.Flow
  * Las funciones que devuelven Flow avisan solas a la pantalla cuando los datos cambian.
  */
 
-/** Cliente ya conocido (sirve para autocompletar el nombre al escribir un teléfono). */
-data class ClienteConocido(val nombreCliente: String, val telefono: String)
-
 @Dao
 interface SuscripcionDao {
     @Query("SELECT * FROM suscripciones WHERE activa = 1 ORDER BY fechaVencimiento ASC")
@@ -26,7 +23,8 @@ interface SuscripcionDao {
     @Query("SELECT * FROM suscripciones")
     suspend fun todas(): List<Suscripcion>
 
-    @Query("SELECT DISTINCT nombreCliente, telefono FROM suscripciones ORDER BY nombreCliente ASC")
+    // Un registro por teléfono; los clientes con suscripción más reciente primero
+    @Query("SELECT nombreCliente, telefono FROM suscripciones GROUP BY telefono ORDER BY MAX(id) DESC")
     fun observarClientes(): Flow<List<ClienteConocido>>
 
     @Query("SELECT COUNT(*) FROM suscripciones WHERE servicioId = :servicioId AND activa = 1")

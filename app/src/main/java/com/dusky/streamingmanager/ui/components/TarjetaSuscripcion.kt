@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -28,6 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.dusky.streamingmanager.data.Proveedor
 import com.dusky.streamingmanager.data.Suscripcion
 import com.dusky.streamingmanager.ui.theme.Paleta
 import com.dusky.streamingmanager.util.NivelUrgencia
@@ -66,6 +69,7 @@ class AccionesTarjeta(
 fun TarjetaSuscripcion(
     s: Suscripcion,
     icono: String?,
+    proveedor: Proveedor?,
     seleccionada: Boolean,
     alTocar: () -> Unit,
     alMantener: () -> Unit,
@@ -121,7 +125,7 @@ fun TarjetaSuscripcion(
                 }
             }
             if (acciones != null) {
-                Detalle(s, dias, acciones)
+                Detalle(s, dias, proveedor, acciones)
             }
         }
 
@@ -137,13 +141,19 @@ fun TarjetaSuscripcion(
 
 /** Parte que aparece al expandir: datos de la cuenta y botones. */
 @Composable
-private fun Detalle(s: Suscripcion, dias: Long, acciones: AccionesTarjeta) {
+private fun Detalle(s: Suscripcion, dias: Long, proveedor: Proveedor?, acciones: AccionesTarjeta) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Box(Modifier.fillMaxWidth().height(1.dp).background(Paleta.Borde))
         Spacer(Modifier.height(6.dp))
+
+        // Quién vende esta cuenta, con acceso directo a sus chats
+        if (proveedor != null) {
+            FilaProveedor(proveedor, acciones.chatVentas, acciones.chatSoporte)
+            Spacer(Modifier.height(4.dp))
+        }
 
         Dato("Teléfono", s.telefono)
         Dato("Tu costo", dinero(s.costo), Paleta.Rojo)
@@ -169,21 +179,44 @@ private fun Detalle(s: Suscripcion, dias: Long, acciones: AccionesTarjeta) {
             BotonAccion("Renovar", Paleta.Azul, Modifier.weight(1f), acciones.renovar)
             BotonAccion("Editar", Paleta.SuperficieAlta, Modifier.weight(1f), acciones.editar, Paleta.Texto)
         }
-        if (acciones.chatVentas != null || acciones.chatSoporte != null) {
-            Spacer(Modifier.height(6.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (acciones.chatVentas != null) {
-                    OutlinedButton(onClick = acciones.chatVentas, modifier = Modifier.weight(1f)) {
-                        Text("Proveedor: ventas", color = Paleta.Texto)
-                    }
-                }
-                if (acciones.chatSoporte != null) {
-                    OutlinedButton(onClick = acciones.chatSoporte, modifier = Modifier.weight(1f)) {
-                        Text("Proveedor: soporte", color = Paleta.Texto)
-                    }
-                }
-            }
+    }
+}
+
+/** Icono y nombre del proveedor, con botones pequeños a sus chats de ventas y soporte (si tiene número). */
+@Composable
+private fun FilaProveedor(proveedor: Proveedor, chatVentas: (() -> Unit)?, chatSoporte: (() -> Unit)?) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icono(proveedor.icono, proveedor.color, proveedor.nombre, tamano = 32.dp)
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text("Proveedor", color = Paleta.TextoSecundario, fontSize = 12.sp)
+            Text(
+                text = proveedor.nombre,
+                color = Paleta.Texto,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
+        if (chatVentas != null) BotonChat("Ventas", chatVentas)
+        if (chatSoporte != null) {
+            Spacer(Modifier.width(6.dp))
+            BotonChat("Soporte", chatSoporte)
+        }
+    }
+}
+
+@Composable
+private fun BotonChat(texto: String, alTocar: () -> Unit) {
+    OutlinedButton(
+        onClick = alTocar,
+        modifier = Modifier.height(34.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+    ) {
+        Text(texto, color = Paleta.Texto, fontSize = 13.sp, maxLines = 1)
     }
 }
 

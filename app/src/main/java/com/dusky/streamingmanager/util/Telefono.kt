@@ -12,3 +12,18 @@ fun normalizarTelefono(texto: String, codigoPais: String): String {
     val pais = soloDigitos(codigoPais)
     return if (limpio.length <= 10 && pais.isNotEmpty()) pais + limpio else limpio
 }
+
+/**
+ * Limpia un número pegado desde WhatsApp o los contactos: deja solo dígitos y quita el código
+ * de país si lo trae. Ej: "+57 300 123 4567" -> "3001234567".
+ * Los números de otros países (más de 10 dígitos y otro prefijo) se dejan completos.
+ */
+fun limpiarTelefono(texto: String, codigoPais: String): String {
+    val digitos = soloDigitos(texto).trimStart('0')      // "0057..." -> "57..."
+    val pais = soloDigitos(codigoPais)
+    return if (pais.isNotEmpty() && digitos.length > 10 && digitos.startsWith(pais)) {
+        digitos.removePrefix(pais)
+    } else {
+        digitos
+    }
+}

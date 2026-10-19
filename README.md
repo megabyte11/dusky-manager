@@ -1,4 +1,4 @@
-
+<p align="center"><img src="docs/icono.png" width="120" alt="Dusky"></p>
 
 # Dusky Streaming Manager
 
