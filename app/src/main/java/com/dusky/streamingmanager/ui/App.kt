@@ -62,7 +62,7 @@ fun App() {
                 alCambiarPestana = { pestana = it },
                 irA = { pantalla = it },
             )
-            is Pantalla.Formulario -> FormularioScreen(vm, p.suscripcionId) { volver() }
+            is Pantalla.Formulario -> FormularioScreen(vm, p.suscripcionId, p.copiarDeId) { volver() }
             is Pantalla.EditorProveedor -> EditorProveedorScreen(
                 vm = vm,
                 proveedorId = p.proveedorId,

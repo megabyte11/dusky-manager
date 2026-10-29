@@ -19,8 +19,8 @@ android {
         applicationId = "com.dusky.streamingmanager"
         minSdk = 26          // Android 8.0 en adelante
         targetSdk = 35
-        versionCode = 3      // sube 1 con cada versión nueva
-        versionName = "1.0.0"
+        versionCode = 4      // sube 1 con cada versión nueva
+        versionName = "1.1.0"
     }
 
     signingConfigs {

@@ -105,6 +105,7 @@ object Respaldo {
         put("id", s.id)
         put("nombreCliente", s.nombreCliente)
         put("telefono", s.telefono)
+        put("usuarioWhatsApp", s.usuarioWhatsApp)
         put("servicioId", s.servicioId)
         put("proveedorId", s.proveedorId)
         put("servicioNombre", s.servicioNombre)
@@ -125,6 +126,7 @@ object Respaldo {
         id = o.getLong("id"),
         nombreCliente = o.getString("nombreCliente"),
         telefono = o.getString("telefono"),
+        usuarioWhatsApp = o.texto("usuarioWhatsApp"),
         servicioId = if (o.has("servicioId") && !o.isNull("servicioId")) o.getLong("servicioId") else null,
         proveedorId = if (o.has("proveedorId") && !o.isNull("proveedorId")) o.getLong("proveedorId") else null,
         servicioNombre = o.getString("servicioNombre"),

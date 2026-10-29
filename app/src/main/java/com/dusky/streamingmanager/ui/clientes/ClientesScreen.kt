@@ -24,9 +24,10 @@ import com.dusky.streamingmanager.ui.components.PanelResumen
 import com.dusky.streamingmanager.ui.components.TarjetaSuscripcion
 import com.dusky.streamingmanager.ui.theme.Paleta
 import com.dusky.streamingmanager.util.abrirWhatsApp
+import com.dusky.streamingmanager.util.claveCliente
+import com.dusky.streamingmanager.util.enviarPorWhatsApp
 import com.dusky.streamingmanager.util.mensajeDatos
 import com.dusky.streamingmanager.util.mensajeRecordatorio
-import com.dusky.streamingmanager.util.soloDigitos
 
 /**
  * Pestaña principal: tarjetas de resumen fijas arriba y la lista de suscripciones debajo.
@@ -39,6 +40,7 @@ fun ClientesScreen(
     alAlternarSeleccion: (Long) -> Unit,
     alRenovar: (Suscripcion) -> Unit,
     alEditar: (Suscripcion) -> Unit,
+    alOtroServicio: (Suscripcion) -> Unit,
 ) {
     val contexto = LocalContext.current
     val resumen by vm.resumen.collectAsStateWithLifecycle()
@@ -97,17 +99,25 @@ fun ClientesScreen(
                         AccionesTarjeta(
                             recordar = {
                                 // Misma persona y misma fecha de vencimiento -> un solo mensaje combinado
+                                val clave = claveCliente(s.telefono, s.usuarioWhatsApp)
                                 val grupo = lista.filter { otra ->
-                                    soloDigitos(otra.telefono) == soloDigitos(s.telefono) &&
+                                    claveCliente(otra.telefono, otra.usuarioWhatsApp) == clave &&
                                         otra.fechaVencimiento == s.fechaVencimiento
                                 }
-                                abrirWhatsApp(contexto, s.telefono, config.codigoPais, mensajeRecordatorio(s, grupo, config))
+                                enviarPorWhatsApp(
+                                    contexto, s.telefono, s.usuarioWhatsApp, config.codigoPais,
+                                    mensajeRecordatorio(s, grupo, config),
+                                )
                             },
                             enviarDatos = {
-                                abrirWhatsApp(contexto, s.telefono, config.codigoPais, mensajeDatos(s, config))
+                                enviarPorWhatsApp(
+                                    contexto, s.telefono, s.usuarioWhatsApp, config.codigoPais,
+                                    mensajeDatos(s, config),
+                                )
                             },
                             renovar = { alRenovar(s) },
                             editar = { alEditar(s) },
+                            otroServicio = { alOtroServicio(s) },
                             chatVentas = proveedor?.whatsappVentas?.takeIf { it.isNotBlank() }?.let { numero ->
                                 { abrirWhatsApp(contexto, numero, config.codigoPais) }
                             },

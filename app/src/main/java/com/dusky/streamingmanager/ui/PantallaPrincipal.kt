@@ -112,6 +112,7 @@ fun PantallaPrincipal(
                     },
                     alRenovar = { renovando = it },
                     alEditar = { irA(Pantalla.Formulario(it.id)) },
+                    alOtroServicio = { irA(Pantalla.Formulario(null, it.id)) },
                 )
                 1 -> HistorialScreen(vm)
                 else -> AjustesScreen(vm, irA)

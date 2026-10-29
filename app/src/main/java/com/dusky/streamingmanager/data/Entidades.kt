@@ -11,7 +11,8 @@ import androidx.room.PrimaryKey
  * Convenciones:
  *  - Las fechas se guardan como "día del calendario" (Long). Ver util/Fechas.kt.
  *  - Los colores se guardan como Int (formato ARGB de Android).
- *  - No hay tabla "Cliente": el cliente es simplemente nombre + teléfono dentro de cada suscripción.
+ *  - No hay tabla "Cliente": el cliente es simplemente nombre + teléfono (y/o usuario de WhatsApp)
+ *    dentro de cada suscripción.
  */
 
 /** Quien te vende las cuentas. Siempre existe uno llamado "Default" (sin foto ni número). */
@@ -59,7 +60,8 @@ data class Servicio(
 data class Suscripcion(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val nombreCliente: String,
-    val telefono: String,
+    val telefono: String,                    // puede ser "" si el cliente solo tiene usuario de WhatsApp
+    val usuarioWhatsApp: String? = null,     // usuario sin "@" (opcional): ana.perez
     val servicioId: Long? = null,
     val proveedorId: Long? = null,
     val servicioNombre: String,

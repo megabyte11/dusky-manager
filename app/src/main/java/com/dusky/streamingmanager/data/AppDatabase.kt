@@ -10,18 +10,13 @@ import androidx.room.RoomDatabase
  *
  * IMPORTANTE: si cambias una entidad (agregar o quitar columnas) hay que:
  *   1) subir [version],
- *   2) escribir una Migration que conserve los datos y agregarla con .addMigrations(...).
+ *   2) escribir una Migration en Migraciones.kt que conserve los datos y agregarla abajo
+ *      con .addMigrations(...).
  * Sin migración la app se cierra al abrir (a propósito: nunca borra los datos de tus clientes).
- * Ejemplo para agregar una columna en la versión 2:
- *   val MIGRACION_1_2 = object : Migration(1, 2) {
- *       override fun migrate(db: SupportSQLiteDatabase) {
- *           db.execSQL("ALTER TABLE suscripciones ADD COLUMN etiqueta TEXT")
- *       }
- *   }
  */
 @Database(
     entities = [Proveedor::class, Servicio::class, Suscripcion::class, Movimiento::class],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -43,6 +38,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "dusky.db",
                 )
+                    .addMigrations(MIGRACION_1_2)
                     .build()
                     .also { instancia = it }
             }

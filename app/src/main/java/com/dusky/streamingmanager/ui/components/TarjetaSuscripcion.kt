@@ -54,6 +54,7 @@ class AccionesTarjeta(
     val enviarDatos: () -> Unit,
     val renovar: () -> Unit,
     val editar: () -> Unit,
+    val otroServicio: () -> Unit,
     val chatVentas: (() -> Unit)?,
     val chatSoporte: (() -> Unit)?,
 )
@@ -155,7 +156,8 @@ private fun Detalle(s: Suscripcion, dias: Long, proveedor: Proveedor?, acciones:
             Spacer(Modifier.height(4.dp))
         }
 
-        Dato("Teléfono", s.telefono)
+        if (s.telefono.isNotBlank()) Dato("Teléfono", s.telefono)
+        if (!s.usuarioWhatsApp.isNullOrBlank()) Dato("Usuario WhatsApp", "@" + s.usuarioWhatsApp)
         Dato("Tu costo", dinero(s.costo), Paleta.Rojo)
         Dato("Venta", dinero(s.precio), Paleta.Verde)
         Dato("Ganancia", dinero(s.precio - s.costo), Paleta.Azul)
@@ -178,6 +180,10 @@ private fun Detalle(s: Suscripcion, dias: Long, proveedor: Proveedor?, acciones:
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BotonAccion("Renovar", Paleta.Azul, Modifier.weight(1f), acciones.renovar)
             BotonAccion("Editar", Paleta.SuperficieAlta, Modifier.weight(1f), acciones.editar, Paleta.Texto)
+        }
+        Spacer(Modifier.height(6.dp))
+        OutlinedButton(onClick = acciones.otroServicio, modifier = Modifier.fillMaxWidth()) {
+            Text("+ Otro servicio", color = Paleta.Texto, fontWeight = FontWeight.Bold)
         }
     }
 }

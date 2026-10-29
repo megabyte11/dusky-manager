@@ -23,8 +23,11 @@ interface SuscripcionDao {
     @Query("SELECT * FROM suscripciones")
     suspend fun todas(): List<Suscripcion>
 
-    // Un registro por teléfono; los clientes con suscripción más reciente primero
-    @Query("SELECT nombreCliente, telefono FROM suscripciones GROUP BY telefono ORDER BY MAX(id) DESC")
+    // Un registro por teléfono + usuario; los clientes con suscripción más reciente primero
+    @Query(
+        "SELECT nombreCliente, telefono, usuarioWhatsApp FROM suscripciones " +
+            "GROUP BY telefono, usuarioWhatsApp ORDER BY MAX(id) DESC",
+    )
     fun observarClientes(): Flow<List<ClienteConocido>>
 
     @Query("SELECT COUNT(*) FROM suscripciones WHERE servicioId = :servicioId AND activa = 1")
